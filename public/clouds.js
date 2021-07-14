@@ -95,24 +95,27 @@ class Cloud extends Entity {
                 this.timer -= Math.round(Main.delta);
                 return;
             }
-            if (this.scale < 0.99) {
-                this.scale += 0.05 * (1 - this.scale) * Main.delta / 6.9;
-                this.opacity = this.scale * 0.85;
+            if (!this.erasing) {
+                if (this.scale < 0.99) {
+                    this.scale += 0.05 * (1 - this.scale) * Main.delta / 6.9;
+                    this.opacity = this.scale * 0.85;
+                }
+                else {
+                    this.scale = 1;
+                    if (Input.detect("rightmousedown").on(this))
+                        this.erasing = true;
+                }
             }
             else {
-                this.scale = 1;
-                if (Input.detect("rightmousedown").on(this))
-                    this.erasing = true;
-            }
-            if (this.erasing) {
-                if (this.scale > 0.2) {
-                    this.scale -= 0.05 * Main.delta / 6.9;
+                if (this.scale > 0.1) {
+                    this.scale -= 0.05 * this.scale * Main.delta / 6.9;
                     if (this.scale < 0)
                         this.scale = 0;
                     this.opacity = this.scale * 0.85;
                 }
-                else
+                else {
                     this.delete();
+                }
             }
             this.direction += 1.5 * this.clockwise * Main.delta;
         }
