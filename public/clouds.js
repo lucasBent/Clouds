@@ -44,6 +44,12 @@ async function load() {
     Main.processBefore = () => {
         if (Input.detect("click").on("anywhere"))
             cloudFormation2(Input.mouseX, Input.mouseY);
+        if (Input.detect("keyjustpressed").on("ArrowDown")) {
+            for (let entity of Entities.list) {
+                if (entity instanceof Cloud)
+                    entity.erasing = true;
+            }
+        }
     }
     Main.processAlwaysAfter = () => {
         if (Input.detect("keyjustpressed").on(" ")) {

@@ -152,10 +152,8 @@ export class Input {
         this.canvas.tabIndex = 1000;
         this.canvas.focus();
         this.canvas.onkeydown = (event) => {
-            for (let key of event.key) {
-                if (!this.keysDown.has(key))
-                    this.newKeys.add(key);
-            }
+            if (!this.keysDown.has(event.key))
+                this.newKeys.add(event.key);
             this.keysDown.add(event.key);
         }
 
