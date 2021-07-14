@@ -109,6 +109,7 @@ export class Input {
         this.rightMouseDown;
         this.canvas = canvas;
         this.keysDown = new Set();
+        this.newKeys = new Set();
     }
 
     /**
@@ -151,12 +152,25 @@ export class Input {
         this.canvas.tabIndex = 1000;
         this.canvas.focus();
         this.canvas.onkeydown = (event) => {
+            for (let key of event.key) {
+                if (!this.keysDown.has(key))
+                    this.newKeys.add(key);
+            }
             this.keysDown.add(event.key);
         }
 
         this.canvas.onkeyup = (event) => {
             this.keysDown.delete(event.key);
         }
+    }
+
+
+    /**
+    * Resets the state of Input logic for the next frame of the main process.
+    */
+    static reset() {
+        this.click = false;
+        this.newKeys.clear();
     }
 
     /**
@@ -276,6 +290,10 @@ export class Input {
 
         else if (this.currentInput == "keydown") {
             return this.keysDown.has(area);
+        }
+
+        else if (this.currentInput == "keyjustpressed") {
+            return this.newKeys.has(area);
         }
 
         else if (this.currentInput == "keyup") {
@@ -418,6 +436,8 @@ export class Main {
 
     static processBefore = undefined;
     static processAfter = undefined;
+    static processAlwaysBefore = undefined;
+    static processAlwaysAfter = undefined;
 
     /**
      * Starts the main process.
@@ -452,15 +472,19 @@ export class Main {
         // Clear the screen.
         Renderer.clear();
 
+        // Run process code from outside the engine that should always run, regardless of whether other processes are paused.
+        if (Main.processAlwaysBefore)
+            Main.processAlwaysBefore();
+
         // Run process code from outside the engine that does not apply to a specific Entity. Runs before built-in process code.
-        if (Main.processBefore)
+        if (Main.processBefore && !Global.paused)
             Main.processBefore();
 
         // Render and run the processes of all applicable Entities. Skip over Entities marked for deletion.
         for (let entity of Entities.list) {
             if (entity.deleted)
                 continue;
-            if (entity.process)
+            if (entity.process && !Global.paused)
                 entity.process();
             Renderer.renderEntity(entity);
         }
@@ -471,11 +495,16 @@ export class Main {
         }
 
         // Run process code from outside the engine that does not apply to a specific Entity. Runs after built-in process code.
-        if (Main.processAfter)
+        if (Main.processAfter && !Global.paused)
             Main.processAfter();
 
-        // Reset the state of a click for the next frame.
-        Input.click = false;
+        // Run process code from outside the engine that should always run, regardless of whether other processes are paused.
+        if (Main.processAlwaysAfter)
+            Main.processAlwaysAfter();
+
+        // Reset the state of Input logic for the next frame.
+        Input.reset();
+
 
         // Call process again.
         window.requestAnimationFrame(Main.process);
@@ -486,4 +515,5 @@ export class Main {
 * A class to house globals.
 */
 export class Global {
+    static paused = false;
 }

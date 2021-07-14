@@ -3,8 +3,10 @@ import { Entity, Entities, Sprite, Input, Hitbox, Renderer, Loader, Main, Global
 const canvas = document.getElementById("display");
 const ctx = canvas.getContext("2d");
 Global.assets = new Object();
-Global.debug = false;
+Global.debug = true;
+Global.paused = false;
 let jimmy = "cool guy";
+let nextFrame = false;
 
 async function load() {
     canvas.width = window.innerWidth;
@@ -34,15 +36,19 @@ async function load() {
 
 (async function main() {
     await load();
-    Main.processBefore = () => {
+    Main.processAlwaysBefore = () => {
         // #58a7d6?
         ctx.fillStyle = "#478db5";
         ctx.fillRect(0, 0, canvas.width, canvas.height);
+    }
+    Main.processBefore = () => {
         if (Input.detect("click").on("anywhere"))
             cloudFormation2(Input.mouseX, Input.mouseY);
     }
-    Main.processAfter = () => {
-
+    Main.processAlwaysAfter = () => {
+        if (Input.detect("keyjustpressed").on(" ")) {
+            Global.paused = !Global.paused;
+        }
         if (Global.debug) {
             ctx.fillStyle = "#FFFFFF";
             ctx.font = "16px arial";
@@ -53,6 +59,18 @@ async function load() {
             ctx.fillText(`mouse down on jimmy?: ${jimmy.mouseDown}`, 20, 110);
             ctx.fillText(`fps: ${Main.fps}`, 20, 130);
             ctx.fillText(`rightMouseDown: ${Input.rightMouseDown}`, 20, 150);
+            ctx.fillText(`paused: ${Global.paused}`, 20, 170);
+
+            if (nextFrame) {
+                if (Global.paused)
+                    Global.paused = false;
+                else {
+                    Global.paused = true;
+                    nextFrame = false;
+                }
+            }
+            if (Global.paused && Input.detect("keyjustpressed").on("."))
+                nextFrame = true;
         }
     }
     Main.startProcess();
