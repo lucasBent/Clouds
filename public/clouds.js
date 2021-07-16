@@ -56,7 +56,7 @@ async function load() {
             genCloud();
     }
     Main.processAlwaysAfter = () => {
-        if (Input.detect("keyjustpressed").on(" ")) {
+        if (Input.detect("keyjustpressed").on("Enter")) {
             Global.paused = !Global.paused;
         }
         if (Global.debug) {
