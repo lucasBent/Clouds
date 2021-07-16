@@ -3,7 +3,7 @@ import { Entity, Entities, Sprite, Input, Hitbox, Renderer, Loader, Main, Global
 const canvas = document.getElementById("display");
 const ctx = canvas.getContext("2d");
 Global.assets = new Object();
-Global.debug = true;
+Global.debug = false;
 Global.paused = false;
 let jimmy = "cool guy";
 let nextFrame = false;
@@ -29,9 +29,11 @@ async function load() {
             if (!jimmy.mouseDown)
                 jimmy.direction += 1.5 * jimmy.clockwise * Main.delta;
         }
-        cloudFormation(300, 100, 120, 80, 100);
-        cloudFormation(1000, 400, 170, 100, 180);
+        // cloudFormation(300, 100, 120, 80, 100);
+        // cloudFormation(1000, 400, 170, 100, 180);
     }
+    //for (let i = 0; i < random(5, 10); i++)
+    //    genCloud();
 }
 
 (async function main() {
@@ -50,6 +52,8 @@ async function load() {
                     entity.erasing = true;
             }
         }
+        if (Input.detect("keyjustpressed").on("ArrowUp"))
+            genCloud();
     }
     Main.processAlwaysAfter = () => {
         if (Input.detect("keyjustpressed").on(" ")) {
@@ -141,7 +145,23 @@ function cloudFormation2(x, y) {
     let density = random(5, 40);
     for (let i = 0; i < density; i++) {
         new Cloud(x, y, i, i * 10);
-        x += random(Math.round(-20 + (i * 0.5)), 20 - (i * 0.5));
+        x += random(Math.round(-20 + (i * 0.6)), 20 - (i * 0.6));
         y += random(-10 + (i * 0.1), 10 - (i * 0.1));
     }
+}
+
+function cloudFormation3(x, y) {
+    let density = random(5, 40);
+    for (let i = 0; i < density; i++) {
+        new Cloud(x, y, i, i * 10);
+        x += random(Math.round(-15 + (i * 0.9)), 15 - (i * 0.9));
+        y += random(-10 + (i * 0.5), 10 - (i * 0.5));
+    }
+}
+
+function genCloud() {
+    let x = canvas.width / 2 + random(canvas.width / -4, canvas.width / 4) + random(canvas.width / -6, canvas.width / 6);
+    let y = canvas.height / 2 + random(canvas.height / -4, canvas.height / 4) + random(canvas.height / -6, canvas.height / 6);
+    for (let i = 0; i < random(10, 40); i++)
+        cloudFormation3(x + random(-30, 30), y + random(-30, 30));
 }
