@@ -29,6 +29,7 @@ export class Entity {
         this.collision = collision;
         this.scale = 1;
         this.deleted = false;
+        this.brightness = 100;
         Entities.add(this);
     }
 
@@ -78,12 +79,29 @@ export class Entities {
 }
 
 /**
+* A solid color for use in a Sprite.
+*/
+export class SolidColor {
+
+    /**
+     * @param {string} color The hex code for this color.
+     * @param {number} width The width of this solid color image.
+     * @param {number} height The height of this solid color image.
+     */
+    constructor(color, width, height) {
+        this.color = color;
+        this.width = width;
+        this.height = height;
+    }
+}
+
+/**
 * A 2D sprite.
 */
 export class Sprite {
 
     /**
-     * @param frames An array of Images for this Sprite.
+     * @param frames An array of Images/SolidColors for this Sprite.
      */
     constructor(frames) {
         this.frames = frames;
@@ -358,17 +376,32 @@ export class Renderer {
     }
 
     /**
+     * Sets canvas brightness based on the corresponding value from a specific Entity.
+     * @param {Entity} entity The Entity whose brightness should be matched.
+     */
+    static brightness(entity) {
+        this.ctx.filter = "brightness(" + entity.brightness + "%)";
+    }
+
+    /**
      * Draws an Entity to the screen using its current frame.
      * @param {Entity} entity The Entity to render.
      */
     static renderEntity(entity) {
         let frame = entity.sprite.frames[entity.sprite.currentFrame];
         this.ctx.save();
+        if (entity.brightness != 100)
+            this.brightness(entity);
         this.ctx.translate(entity.x, entity.y);
         this.ctx.rotate(entity.direction * 0.0026 / Math.PI);
         this.ctx.globalAlpha = entity.opacity;
         this.ctx.translate(-(entity.x), -(entity.y));
-        this.ctx.drawImage(frame, entity.x - frame.width * entity.scale / 2, entity.y - frame.height * entity.scale / 2, frame.width * entity.scale, frame.height * entity.scale);
+        if (frame instanceof Image)
+            this.ctx.drawImage(frame, entity.x - frame.width * entity.scale / 2, entity.y - frame.height * entity.scale / 2, frame.width * entity.scale, frame.height * entity.scale);
+        else {
+            this.ctx.fillStyle = frame.color;
+            this.ctx.fillRect(entity.x - frame.width * entity.scale / 2, entity.y - frame.height * entity.scale / 2, frame.width * entity.scale, frame.height * entity.scale);
+        }
         this.ctx.restore();
     }
 

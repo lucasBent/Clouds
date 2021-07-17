@@ -1,18 +1,44 @@
-import { Entity, Entities, Sprite, Input, Hitbox, Renderer, Loader, Main, Global } from "./engine/engine.js"
+import { Entity, Entities, SolidColor, Sprite, Input, Hitbox, Renderer, Loader, Main, Global } from "./engine/engine.js"
 
 const canvas = document.getElementById("display");
 const ctx = canvas.getContext("2d");
 Global.assets = new Object();
-Global.debug = false;
+Global.debug = true;
 Global.paused = false;
+Global.raining = false;
 let jimmy = "cool guy";
+let sky = undefined;
 let nextFrame = false;
 
 async function load() {
     canvas.width = window.innerWidth;
     canvas.height = window.innerHeight;
+    // #58a7d6?
     ctx.fillStyle = "#478db5";
     ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+    let skyImage = new SolidColor("#478db5", canvas.width, canvas.height);
+    sky = new Entity(new Sprite([skyImage]), canvas.width / 2, canvas.height / 2);
+    sky.process = () => {
+        sky.sprite.frames[sky.sprite.currentFrame].width = canvas.width = window.innerWidth;
+        sky.sprite.frames[sky.sprite.currentFrame].height = canvas.height = window.innerHeight;
+        sky.x = canvas.width / 2;
+        sky.y = canvas.height / 2;
+        if (Global.raining) {
+            if (sky.brightness > 50) {
+                sky.brightness -= 0.1 * Main.delta;
+                if (sky.brightness < 50)
+                    sky.brightness = 50;
+            }
+        }
+        else {
+            if (sky.brightness < 100) {
+                sky.brightness += 0.1 * Main.delta;
+                if (sky.brightness > 100)
+                    sky.brightness = 100;
+            }
+        }
+    }
 
     Main.init(canvas);
 
@@ -38,11 +64,6 @@ async function load() {
 
 (async function main() {
     await load();
-    Main.processAlwaysBefore = () => {
-        // #58a7d6?
-        ctx.fillStyle = "#478db5";
-        ctx.fillRect(0, 0, canvas.width, canvas.height);
-    }
     Main.processBefore = () => {
         if (Input.detect("click").on("anywhere"))
             cloudFormation2(Input.mouseX, Input.mouseY);
@@ -56,9 +77,8 @@ async function load() {
             genCloud();
     }
     Main.processAlwaysAfter = () => {
-        if (Input.detect("keyjustpressed").on("Enter")) {
+        if (Input.detect("keyjustpressed").on("Enter"))
             Global.paused = !Global.paused;
-        }
         if (Global.debug) {
             ctx.fillStyle = "#FFFFFF";
             ctx.font = "16px arial";
@@ -79,8 +99,15 @@ async function load() {
                     nextFrame = false;
                 }
             }
+
             if (Global.paused && Input.detect("keyjustpressed").on("."))
                 nextFrame = true;
+
+            if (Input.detect("keyjustpressed").on("1"))
+                console.log(Entities.list.length);
+
+            if (Input.detect("keyjustpressed").on(" "))
+                Global.raining = !Global.raining;
         }
     }
     Main.startProcess();
@@ -162,6 +189,6 @@ function cloudFormation3(x, y) {
 function genCloud() {
     let x = canvas.width / 2 + random(canvas.width / -4, canvas.width / 4) + random(canvas.width / -6, canvas.width / 6);
     let y = canvas.height / 2 + random(canvas.height / -4, canvas.height / 4) + random(canvas.height / -6, canvas.height / 6);
-    for (let i = 0; i < random(10, 40); i++)
+    for (let i = 0; i < random(10, 30); i++)
         cloudFormation3(x + random(-30, 30), y + random(-30, 30));
 }
