@@ -30,7 +30,7 @@ export class Entity {
         this.scale = 1;
         this.deleted = false;
         this.brightness = 100;
-        Entities.add(this);
+        this.init();
     }
 
     /**
@@ -45,7 +45,14 @@ export class Entity {
     }
 
     /**
-     * Marks this Entity for deletion for when it is next iterated over.
+     * Marks this Entity for addition to the main Entity list at the end of the current frame, effectively initializing it.
+     */
+    init() {
+        Entities.addQueue.push(this);
+    }
+
+    /**
+     * Marks this Entity for deletion at the end of the current frame.
      */
     delete() {
         this.deleted = true;
@@ -59,6 +66,7 @@ export class Entity {
 export class Entities {
 
     static list = [];
+    static addQueue = [];
     static removeQueue = [];
 
     /**
@@ -518,6 +526,11 @@ export class Main {
             if (entity.process && !Global.paused)
                 entity.process();
             Renderer.renderEntity(entity);
+        }
+
+        // Add all Entities in the queue for addition.
+        while (Entities.addQueue.length > 0) {
+            Entities.add(Entities.addQueue.shift());
         }
 
         // Remove all Entities in the queue for removal.
