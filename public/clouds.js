@@ -3,7 +3,7 @@ import { Entity, Entities, SolidColor, Sprite, Input, Hitbox, Renderer, Loader, 
 const canvas = document.getElementById("display");
 const ctx = canvas.getContext("2d");
 Global.assets = new Object();
-Global.debug = true;
+Global.debug = false;
 Global.paused = false;
 Global.raining = false;
 let jimmy = "cool guy";
@@ -13,7 +13,7 @@ let nextFrame = false;
 async function load() {
     canvas.width = window.innerWidth;
     canvas.height = window.innerHeight;
-    
+
     // #58a7d6?
     ctx.fillStyle = "#478db5";
     ctx.fillRect(0, 0, canvas.width, canvas.height);
