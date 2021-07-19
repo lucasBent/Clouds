@@ -484,6 +484,9 @@ export class Main {
     static canvasResize() {
         Main.canvas.setAttribute("width", Main.canvas.clientWidth * window.devicePixelRatio);
         Main.canvas.setAttribute("height", Main.canvas.clientHeight * window.devicePixelRatio);
+
+        Main.canvas.width = window.innerWidth;
+        Main.canvas.height = window.innerHeight;
     }
 
     /**
