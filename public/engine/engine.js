@@ -143,8 +143,8 @@ export class Input {
     */
     static mouseHook() {
         this.canvas.onmousemove = (event) => {
-            this.mouseX = event.offsetX;
-            this.mouseY = event.offsetY;
+            this.mouseX = event.offsetX * window.devicePixelRatio;
+            this.mouseY = event.offsetY * window.devicePixelRatio;
         }
 
         this.canvas.onmouseup = (event) => {
