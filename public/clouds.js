@@ -11,8 +11,6 @@ let sky = undefined;
 let nextFrame = false;
 
 async function load() {
-    canvas.width = window.innerWidth;
-    canvas.height = window.innerHeight;
     // #58a7d6?
     ctx.fillStyle = "#478db5";
     ctx.fillRect(0, 0, canvas.width, canvas.height);
@@ -20,8 +18,8 @@ async function load() {
     let skyImage = new SolidColor("#478db5", canvas.width, canvas.height);
     sky = new Entity(new Sprite([skyImage]), canvas.width / 2, canvas.height / 2);
     sky.process = () => {
-        sky.sprite.frames[sky.sprite.currentFrame].width = canvas.width = window.innerWidth;
-        sky.sprite.frames[sky.sprite.currentFrame].height = canvas.height = window.innerHeight;
+        sky.sprite.frames[sky.sprite.currentFrame].width = canvas.clientWidth;
+        sky.sprite.frames[sky.sprite.currentFrame].height = canvas.clientHeight;
         sky.x = canvas.width / 2;
         sky.y = canvas.height / 2;
         if (Global.raining) {
