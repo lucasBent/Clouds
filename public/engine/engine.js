@@ -143,8 +143,8 @@ export class Input {
     */
     static mouseHook() {
         this.canvas.onmousemove = (event) => {
-            this.mouseX = event.offsetX * window.devicePixelRatio;
-            this.mouseY = event.offsetY * window.devicePixelRatio;
+            this.mouseX = event.offsetX;
+            this.mouseY = event.offsetY;
         }
 
         this.canvas.onmouseup = (event) => {
@@ -488,6 +488,24 @@ export class Main {
         Main.canvas.style.width = window.innerWidth + "px";
         Main.canvas.style.height = window.innerHeight + "px";
         Main.canvas.getContext("2d").scale(ratio, ratio);
+    }
+
+    /**
+     * Gets the actual width of the canvas.
+     * 
+     * @returns {number} The width of the canvas in pixels.
+     */
+    static getCanvasWidth() {
+        return +Main.canvas.style.width.slice(0, -2);
+    }
+
+    /**
+     * Gets the actual height of the canvas.
+     * 
+     * @returns {number} The height of the canvas in pixels.
+     */
+    static getCanvasHeight() {
+        return +Main.canvas.style.height.slice(0, -2);
     }
 
     /**
