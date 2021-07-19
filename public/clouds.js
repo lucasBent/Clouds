@@ -90,6 +90,7 @@ async function load() {
             ctx.fillText(`fps: ${Main.fps}`, 20, 130);
             ctx.fillText(`rightMouseDown: ${Input.rightMouseDown}`, 20, 150);
             ctx.fillText(`paused: ${Global.paused}`, 20, 170);
+            ctx.fillText(`dpi: ${window.devicePixelRatio}`, 20, 190);
 
             if (nextFrame) {
                 if (Global.paused)
