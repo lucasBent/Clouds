@@ -482,8 +482,6 @@ export class Main {
      * Matches the canvas size and DPI to that of the viewport.
      */
     static canvasResize() {
-        Main.canvas.width = window.innerWidth;
-        Main.canvas.height = window.innerHeight;
         Main.canvas.setAttribute("width", Main.canvas.clientWidth * window.devicePixelRatio);
         Main.canvas.setAttribute("height", Main.canvas.clientHeight * window.devicePixelRatio);
     }
