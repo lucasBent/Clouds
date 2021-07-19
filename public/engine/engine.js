@@ -505,8 +505,8 @@ export class Main {
         Main.prevTimestamp = timestamp;
 
         // Match the canvas to the size of the viewport.
-        Main.canvas.width = window.innerWidth;
-        Main.canvas.height = window.innerHeight;
+        Main.canvas.width = window.innerWidth * Global.dpi;
+        Main.canvas.height = window.innerHeight * Global.dpi;
 
         // Clear the screen.
         Renderer.clear();
@@ -560,4 +560,5 @@ export class Main {
 */
 export class Global {
     static paused = false;
+    static dpi = window.devicePixelRatio;
 }
