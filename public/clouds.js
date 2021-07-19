@@ -18,8 +18,8 @@ async function load() {
     let skyImage = new SolidColor("#478db5", canvas.width, canvas.height);
     sky = new Entity(new Sprite([skyImage]), canvas.width / 2, canvas.height / 2);
     sky.process = () => {
-        sky.sprite.frames[sky.sprite.currentFrame].width = canvas.clientWidth;
-        sky.sprite.frames[sky.sprite.currentFrame].height = canvas.clientHeight;
+        sky.sprite.frames[sky.sprite.currentFrame].width = canvas.width;
+        sky.sprite.frames[sky.sprite.currentFrame].height = canvas.height;
         sky.x = canvas.width / 2;
         sky.y = canvas.height / 2;
         if (Global.raining) {
