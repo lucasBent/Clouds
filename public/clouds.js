@@ -11,6 +11,8 @@ let sky = undefined;
 let nextFrame = false;
 
 async function load() {
+    canvas.width = window.innerWidth;
+    canvas.height = window.innerHeight;
     // #58a7d6?
     ctx.fillStyle = "#478db5";
     ctx.fillRect(0, 0, canvas.width, canvas.height);
