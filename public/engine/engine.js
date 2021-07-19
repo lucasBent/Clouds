@@ -471,13 +471,6 @@ export class Main {
         this.prevTimestamp;
         this.fps = 0;
         this.delta = 0;
-
-        let ratio = window.devicePixelRatio;
-        this.canvas.width = window.innerWidth * ratio;
-        this.canvas.height = window.innerHeight * ratio;
-        this.canvas.style.width = window.innerWidth + "px";
-        this.canvas.style.height = window.innerHeight + "px";
-        this.canvas.getContext("2d").scale(ratio, ratio);
     }
 
     static processBefore = undefined;
@@ -489,10 +482,12 @@ export class Main {
      * Matches the canvas size and DPI to that of the viewport.
      */
     static canvasResize() {
-        // Main.canvas.setAttribute("width", Main.canvas.clientWidth * window.devicePixelRatio);
-        // Main.canvas.setAttribute("height", Main.canvas.clientHeight * window.devicePixelRatio);
-        // Main.canvas.width = window.innerWidth;
-        // Main.canvas.height = window.innerHeight;
+        let ratio = window.devicePixelRatio;
+        Main.canvas.width = window.innerWidth * ratio;
+        Main.canvas.height = window.innerHeight * ratio;
+        Main.canvas.style.width = window.innerWidth + "px";
+        Main.canvas.style.height = window.innerHeight + "px";
+        Main.canvas.getContext("2d").scale(ratio, ratio);
     }
 
     /**
