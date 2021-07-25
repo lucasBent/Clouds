@@ -424,10 +424,10 @@ export class Renderer {
         if (entity.brightness != 100)
             this.brightness(entity);
         this.ctx.translate(entity.x, entity.y);
-        this.ctx.rotate(entity.direction * 0.0026 / Math.PI);
+        this.ctx.rotate(entity.direction * 0.000827605704);
         this.ctx.globalAlpha = entity.opacity;
         this.ctx.translate(-(entity.x), -(entity.y));
-        if (frame instanceof Image)
+        if (!frame.color)
             this.ctx.drawImage(frame, entity.x - frame.width * entity.scale / 2, entity.y - frame.height * entity.scale / 2, frame.width * entity.scale, frame.height * entity.scale);
         else {
             this.ctx.fillStyle = frame.color;
