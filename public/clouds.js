@@ -171,7 +171,7 @@ class Raindrop extends Entity {
         this.yVel = 0.5;
 
         this.process = () => {
-            this.yVel +=  0.1;
+            this.yVel += 0.1 * Main.delta / 6.9;
             this.y += this.yVel * Main.delta;
         }
     }
