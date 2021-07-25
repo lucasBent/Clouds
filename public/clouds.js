@@ -158,7 +158,7 @@ class Cloud extends Entity {
                     this.delete();
                 }
             }
-            this.direction += 1.5 * this.clockwise * Main.delta;
+            this.direction += 1.8 * this.clockwise * Main.delta;
         }
     }
 }
@@ -168,9 +168,11 @@ class Raindrop extends Entity {
         x ??= 0;
         y ??= 0;
         super(new Sprite([Global.assets.raindropImg]), x, y, 1);
+        this.yVel = 0.5;
 
         this.process = () => {
-            this.y += 1 * Main.delta;
+            this.yVel +=  0.1;
+            this.y += this.yVel * Main.delta;
         }
     }
 }
