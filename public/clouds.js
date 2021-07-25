@@ -169,6 +169,7 @@ class Raindrop extends Entity {
         y ??= 0;
         super(new Sprite([Global.assets.raindropImg]), x, y, 1);
         this.yVel = 0.5;
+        this.timer = random(0, 1000);
 
         this.process = () => {
             this.yVel += 0.1 * Main.delta / 6.9;

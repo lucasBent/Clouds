@@ -32,6 +32,7 @@ export class Entity {
         this.scale = 1;
         this.deleted = false;
         this.brightness = 100;
+        this.render = true;
         this.init(layer);
     }
 
@@ -419,21 +420,23 @@ export class Renderer {
      * @param {Entity} entity The Entity to render.
      */
     static renderEntity(entity) {
-        let frame = entity.sprite.frames[entity.sprite.currentFrame];
-        this.ctx.save();
-        if (entity.brightness != 100)
-            this.brightness(entity);
-        this.ctx.translate(entity.x, entity.y);
-        this.ctx.rotate(entity.direction * 0.000827605704);
-        this.ctx.globalAlpha = entity.opacity;
-        this.ctx.translate(-(entity.x), -(entity.y));
-        if (!frame.color)
-            this.ctx.drawImage(frame, entity.x - frame.width * entity.scale / 2, entity.y - frame.height * entity.scale / 2, frame.width * entity.scale, frame.height * entity.scale);
-        else {
-            this.ctx.fillStyle = frame.color;
-            this.ctx.fillRect(entity.x - frame.width * entity.scale / 2, entity.y - frame.height * entity.scale / 2, frame.width * entity.scale, frame.height * entity.scale);
+        if (entity.render) {
+            let frame = entity.sprite.frames[entity.sprite.currentFrame];
+            this.ctx.save();
+            if (entity.brightness != 100)
+                this.brightness(entity);
+            this.ctx.translate(entity.x, entity.y);
+            this.ctx.rotate(entity.direction * 0.000827605704);
+            this.ctx.globalAlpha = entity.opacity;
+            this.ctx.translate(-(entity.x), -(entity.y));
+            if (!frame.color)
+                this.ctx.drawImage(frame, entity.x - frame.width * entity.scale / 2, entity.y - frame.height * entity.scale / 2, frame.width * entity.scale, frame.height * entity.scale);
+            else {
+                this.ctx.fillStyle = frame.color;
+                this.ctx.fillRect(entity.x - frame.width * entity.scale / 2, entity.y - frame.height * entity.scale / 2, frame.width * entity.scale, frame.height * entity.scale);
+            }
+            this.ctx.restore();
         }
-        this.ctx.restore();
     }
 
     /**
