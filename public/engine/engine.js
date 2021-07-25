@@ -7,14 +7,16 @@ export class Entity {
      * @param {Sprite} sprite The Sprite to use for this Entity.
      * @param {number} [x] The x position of this Entity.
      * @param {number} [y] The y position of this Entity.
+     * @param {number|boolean} [layer] The initial layer of this Entity, as a zero-indexed number. Enter false to initialize with default layering.
      * @param {number} [direction] The direction of this Entity, in degrees.
      * @param {number} [opacity] The opacity of this Entity between 0 and 1, with 0 being invisible.
      * @param {Array} [hitboxes] An array of Hitboxes for this Entity. Will default to match the Entity's Sprite's initial frame.
      * @param {boolean} [collision] Determines whether other Entities can collide with this Entity.
      */
-    constructor(sprite, x, y, direction, opacity, hitboxes, collision) {
+    constructor(sprite, x, y, layer, direction, opacity, hitboxes, collision) {
         x ??= 0;
         y ??= 0;
+        layer ??= false;
         direction ??= 0;
         opacity ??= 1;
         hitboxes ??= [new Hitbox(sprite.frames[sprite.currentFrame].width, sprite.frames[sprite.currentFrame].height)];
@@ -30,7 +32,7 @@ export class Entity {
         this.scale = 1;
         this.deleted = false;
         this.brightness = 100;
-        this.init();
+        this.init(layer);
     }
 
     /**
@@ -46,9 +48,11 @@ export class Entity {
 
     /**
      * Marks this Entity for addition to the main Entity list at the end of the current frame, effectively initializing it.
+     * @param {number|boolean} layer The layer (index) at which this Entity should be inserted. Passing false will cause the Entity to simply be pushed to the list.
      */
-    init() {
-        Entities.addQueue.push(this);
+    init(layer) {
+        Entities.addQueue.push([this, layer]);
+
     }
 
     /**
@@ -57,6 +61,20 @@ export class Entity {
     delete() {
         this.deleted = true;
         Entities.removeQueue.push(this);
+    }
+
+    /**
+     * Queues this Entity for movement to the front of the Entity list (front = rendered frontmost).
+     */
+    front() {
+        Entities.layerActionQueue.push([this, "front"]);
+    }
+
+    /**
+     * Queues this Entity for movement to the back of the Entity list (back = rendered behind everything else).
+     */
+    back() {
+        Entities.layerActionQueue.push([this, "back"]);
     }
 }
 
@@ -68,17 +86,22 @@ export class Entities {
     static list = [];
     static addQueue = [];
     static removeQueue = [];
+    static layerActionQueue = [];
 
     /**
-     * Add an Entity to the global list of Entities.
+     * Adds an Entity to the global list of Entities.
      * @param {Entity} entity The Entity to add.
+     * @param {number|boolean} [layer] The layer (index) at which this Entity should be inserted. Passing false will simply push the Entity to the list.
      */
-    static add(entity) {
-        this.list.push(entity);
+    static add(entity, layer) {
+        if (!layer)
+            this.list.push(entity);
+        else
+            this.list.splice(layer, 0, entity);
     }
 
     /**
-     * Remove an Entity from the global list of Entities.
+     * Removes an Entity from the global list of Entities.
      * @param {Entity} entity The Entity to remove.
      */
     static remove(entity) {
@@ -470,6 +493,11 @@ export class Main {
         Input.init(canvas);
         this.prevTimestamp;
         this.fps = 0;
+
+        /**
+        * The amount of time between the current and previous frame.
+        * It is crucial to incorporate this number into all motion-based processing, in order to ensure consistency across framerates.
+        */
         this.delta = 0;
     }
 
@@ -559,12 +587,26 @@ export class Main {
 
         // Add all Entities in the queue for addition.
         while (Entities.addQueue.length > 0) {
-            Entities.add(Entities.addQueue.shift());
+            let newEntity = Entities.addQueue.shift();
+            Entities.add(newEntity[0], newEntity[1]);
         }
 
         // Remove all Entities in the queue for removal.
         while (Entities.removeQueue.length > 0) {
             Entities.remove(Entities.removeQueue.shift());
+        }
+
+        // Perform all Entity layering changes requested during this frame.
+        while (Entities.layerActionQueue.length > 0) {
+            if (Entities.layerActionQueue[0][1] == "front") {
+                Entities.list.splice(Entities.list.indexOf(Entities.layerActionQueue[0][0]), 1);
+                Entities.list.push(Entities.layerActionQueue[0][0]);
+            }
+            else if (Entities.layerActionQueue[0][1] == "back") {
+                Entities.list.splice(Entities.list.indexOf(Entities.layerActionQueue[0][0]), 1);
+                Entities.list.unshift(Entities.layerActionQueue[0][0]);
+            }
+            Entities.layerActionQueue.shift();
         }
 
         // Run process code from outside the engine that does not apply to a specific Entity. Runs after built-in process code.

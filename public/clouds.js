@@ -3,7 +3,7 @@ import { Entity, Entities, SolidColor, Sprite, Input, Hitbox, Renderer, Loader, 
 const canvas = document.getElementById("display");
 const ctx = canvas.getContext("2d");
 Global.assets = new Object();
-Global.debug = false;
+Global.debug = true;
 Global.paused = false;
 Global.raining = false;
 let jimmy = "cool guy";
@@ -28,8 +28,10 @@ async function load() {
         if (Global.raining) {
             if (sky.brightness > 50) {
                 sky.brightness -= 0.1 * Main.delta;
-                if (sky.brightness < 50)
+                if (sky.brightness < 50) {
                     sky.brightness = 50;
+                    startRaining();
+                }
             }
         }
         else {
@@ -47,6 +49,7 @@ async function load() {
     Input.keyHook();
 
     Global.assets.cloudImg = await Loader.loadImage("./images/cloud.png", 28, 31);
+    Global.assets.raindropImg = await Loader.loadImage("./images/raindrop.png", 3, 30);
 
     if (Global.debug) {
         jimmy = new Cloud(400, 500);
@@ -76,6 +79,8 @@ async function load() {
         }
         if (Input.detect("keyjustpressed").on("ArrowUp"))
             genCloud();
+        if (Input.detect("keyjustpressed").on(" "))
+            Global.raining = !Global.raining;
     }
     Main.processAlwaysAfter = () => {
         if (Input.detect("keyjustpressed").on("Enter"))
@@ -107,9 +112,6 @@ async function load() {
 
             if (Input.detect("keyjustpressed").on("1"))
                 console.log(Entities.list.length);
-
-            if (Input.detect("keyjustpressed").on(" "))
-                Global.raining = !Global.raining;
         }
     }
     Main.startProcess();
@@ -121,7 +123,7 @@ class Cloud extends Entity {
         y ??= 0;
         direction ??= 0;
         timer ??= 0;
-        super(new Sprite([Global.assets.cloudImg]), x, y, direction, 0.85);
+        super(new Sprite([Global.assets.cloudImg]), x, y, false, direction, 0.85);
         this.clockwise = Math.random() < 0.5 ? 1 : -1;
         this.scale = random(10, 60) / 100;
         this.opacity = this.scale * 0.85;
@@ -161,6 +163,18 @@ class Cloud extends Entity {
     }
 }
 
+class Raindrop extends Entity {
+    constructor(x, y) {
+        x ??= 0;
+        y ??= 0;
+        super(new Sprite([Global.assets.raindropImg]), x, y, 1);
+
+        this.process = () => {
+            this.y += 1 * Main.delta;
+        }
+    }
+}
+
 function random(min, max) {
     return Math.floor(Math.random() * (max - min + 1) + min);
 }
@@ -193,4 +207,11 @@ function genCloud() {
     let y = Main.getCanvasHeight() / 2 + random(Main.getCanvasHeight() / -4, Main.getCanvasHeight() / 4) + random(Main.getCanvasHeight() / -6, Main.getCanvasHeight() / 6);
     for (let i = 0; i < random(10, 30); i++)
         cloudFormation3(x + random(-30, 30), y + random(-30, 30));
+}
+
+function startRaining() {
+    for (let entity of Entities.list) {
+        if (entity instanceof Cloud && Math.random() < 0.1)
+            new Raindrop(entity.x, entity.y);
+    }
 }
