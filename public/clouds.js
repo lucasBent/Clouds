@@ -27,7 +27,7 @@ async function load() {
         sky.y = Renderer.getCanvasHeight() / 2;
         if (Global.raining) {
             if (sky.brightness > 50) {
-                sky.brightness -= 0.1 * Main.delta;
+                sky.brightness -= 0.05 * Main.delta;
                 if (sky.brightness < 50) {
                     sky.brightness = 50;
                     startRaining();
@@ -36,7 +36,9 @@ async function load() {
         }
         else {
             if (sky.brightness < 100) {
-                sky.brightness += 0.1 * Main.delta;
+                sky.brightness += 0.05 * Main.delta;
+                if (sky.brightness > 75)
+                    stopRaining();
                 if (sky.brightness > 100)
                     sky.brightness = 100;
             }
@@ -174,7 +176,7 @@ class Raindrop extends Entity {
         this.erasing = false;
 
         this.process = () => {
-            if (!Global.raining || parent.deleted || parent.erasing)
+            if (parent.deleted || parent.erasing)
                 this.erasing = true;
             if (this.timer > 0) {
                 if (this.erasing) {
@@ -245,5 +247,12 @@ function startRaining() {
     for (let entity of Entities.list) {
         if (entity instanceof Cloud && Math.random() < 0.1)
             new Raindrop(entity.x, entity.y, entity);
+    }
+}
+
+function stopRaining() {
+    for (let entity of Entities.list) {
+        if (entity instanceof Raindrop)
+            entity.erasing = true;
     }
 }
