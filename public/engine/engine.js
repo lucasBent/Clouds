@@ -147,17 +147,15 @@ export class Sprite {
 export class Input {
 
     /**
-     * Initializes Input's reference to the canvas, as well as other needed variables.
-     * @param {HTMLElement} canvas The canvas to listen to for input.
+     * Initializes needed variables for Input.
      */
-    static init(canvas) {
+    static init() {
         this.currentInput;
         this.mouseX;
         this.mouseY;
         this.click;
         this.mouseDown;
         this.rightMouseDown;
-        this.canvas = canvas;
         this.keysDown = new Set();
         this.newKeys = new Set();
     }
@@ -166,31 +164,31 @@ export class Input {
     * Hooks mouse events to the canvas. Required in order to process mouse inputs.
     */
     static mouseHook() {
-        this.canvas.onmousemove = (event) => {
+        Renderer.canvas.onmousemove = (event) => {
             this.mouseX = event.offsetX;
             this.mouseY = event.offsetY;
         }
 
-        this.canvas.onmouseup = (event) => {
+        Renderer.canvas.onmouseup = (event) => {
             if (event.button == 0)
                 this.mouseDown = false;
             else if (event.button == 2)
                 this.rightMouseDown = false;
         }
 
-        this.canvas.onmousedown = (event) => {
+        Renderer.canvas.onmousedown = (event) => {
             if (event.button == 0)
                 this.mouseDown = true;
             else if (event.button == 2)
                 this.rightMouseDown = true;
         }
 
-        this.canvas.onclick = (event) => {
+        Renderer.canvas.onclick = (event) => {
             if (event.button == 0)
                 this.click = true;
         }
 
-        this.canvas.oncontextmenu = (event) => {
+        Renderer.canvas.oncontextmenu = (event) => {
             event.preventDefault();
         }
     }
@@ -199,15 +197,15 @@ export class Input {
     * Hooks keyboard events to the canvas. Required in order to process keyboard inputs.
     */
     static keyHook() {
-        this.canvas.tabIndex = 1000;
-        this.canvas.focus();
-        this.canvas.onkeydown = (event) => {
+        Renderer.canvas.tabIndex = 1000;
+        Renderer.canvas.focus();
+        Renderer.canvas.onkeydown = (event) => {
             if (!this.keysDown.has(event.key))
                 this.newKeys.add(event.key);
             this.keysDown.add(event.key);
         }
 
-        this.canvas.onkeyup = (event) => {
+        Renderer.canvas.onkeyup = (event) => {
             this.keysDown.delete(event.key);
         }
     }
@@ -394,7 +392,7 @@ export class Hitbox {
 }
 
 /**
-* A class with static methods for rendering.
+* A class with static methods for rendering and a static instance of the project's canvas.
 */
 export class Renderer {
 
@@ -416,27 +414,55 @@ export class Renderer {
     }
 
     /**
+    * Matches the canvas size and DPI to that of the viewport.
+    */
+    static canvasResize() {
+        let ratio = window.devicePixelRatio;
+        Renderer.canvas.width = window.innerWidth * ratio;
+        Renderer.canvas.height = window.innerHeight * ratio;
+        Renderer.canvas.style.width = window.innerWidth + "px";
+        Renderer.canvas.style.height = window.innerHeight + "px";
+        Renderer.canvas.getContext("2d").scale(ratio, ratio);
+    }
+
+    /**
+     * Gets the actual width of the canvas.
+     * 
+     * @returns {number} The width of the canvas in pixels.
+     */
+    static getCanvasWidth() {
+        return +Renderer.canvas.style.width.slice(0, -2);
+    }
+
+    /**
+     * Gets the actual height of the canvas.
+     * 
+     * @returns {number} The height of the canvas in pixels.
+     */
+    static getCanvasHeight() {
+        return +Renderer.canvas.style.height.slice(0, -2);
+    }
+
+    /**
      * Draws an Entity to the screen using its current frame.
      * @param {Entity} entity The Entity to render.
      */
     static renderEntity(entity) {
-        if (entity.render) {
-            let frame = entity.sprite.frames[entity.sprite.currentFrame];
-            this.ctx.save();
-            if (entity.brightness != 100)
-                this.brightness(entity);
-            this.ctx.translate(entity.x, entity.y);
-            this.ctx.rotate(entity.direction * 0.000827605704);
-            this.ctx.globalAlpha = entity.opacity;
-            this.ctx.translate(-(entity.x), -(entity.y));
-            if (!frame.color)
-                this.ctx.drawImage(frame, entity.x - frame.width * entity.scale / 2, entity.y - frame.height * entity.scale / 2, frame.width * entity.scale, frame.height * entity.scale);
-            else {
-                this.ctx.fillStyle = frame.color;
-                this.ctx.fillRect(entity.x - frame.width * entity.scale / 2, entity.y - frame.height * entity.scale / 2, frame.width * entity.scale, frame.height * entity.scale);
-            }
-            this.ctx.restore();
+        let frame = entity.sprite.frames[entity.sprite.currentFrame];
+        this.ctx.save();
+        if (entity.brightness != 100)
+            this.brightness(entity);
+        this.ctx.translate(entity.x, entity.y);
+        this.ctx.rotate(entity.direction * 0.000827605704);
+        this.ctx.globalAlpha = entity.opacity;
+        this.ctx.translate(-(entity.x), -(entity.y));
+        if (!frame.color)
+            this.ctx.drawImage(frame, entity.x - frame.width * entity.scale / 2, entity.y - frame.height * entity.scale / 2, frame.width * entity.scale, frame.height * entity.scale);
+        else {
+            this.ctx.fillStyle = frame.color;
+            this.ctx.fillRect(entity.x - frame.width * entity.scale / 2, entity.y - frame.height * entity.scale / 2, frame.width * entity.scale, frame.height * entity.scale);
         }
+        this.ctx.restore();
     }
 
     /**
@@ -490,8 +516,6 @@ export class Main {
      * @param {HTMLElement} canvas The canvas to use.
      */
     static init(canvas) {
-        this.canvas = canvas;
-        this.ctx = this.canvas.getContext("2d");
         Renderer.init(canvas);
         Input.init(canvas);
         this.prevTimestamp;
@@ -508,36 +532,6 @@ export class Main {
     static processAfter = undefined;
     static processAlwaysBefore = undefined;
     static processAlwaysAfter = undefined;
-
-    /**
-     * Matches the canvas size and DPI to that of the viewport.
-     */
-    static canvasResize() {
-        let ratio = window.devicePixelRatio;
-        Main.canvas.width = window.innerWidth * ratio;
-        Main.canvas.height = window.innerHeight * ratio;
-        Main.canvas.style.width = window.innerWidth + "px";
-        Main.canvas.style.height = window.innerHeight + "px";
-        Main.canvas.getContext("2d").scale(ratio, ratio);
-    }
-
-    /**
-     * Gets the actual width of the canvas.
-     * 
-     * @returns {number} The width of the canvas in pixels.
-     */
-    static getCanvasWidth() {
-        return +Main.canvas.style.width.slice(0, -2);
-    }
-
-    /**
-     * Gets the actual height of the canvas.
-     * 
-     * @returns {number} The height of the canvas in pixels.
-     */
-    static getCanvasHeight() {
-        return +Main.canvas.style.height.slice(0, -2);
-    }
 
     /**
      * Starts the main process.
@@ -566,7 +560,7 @@ export class Main {
         Main.prevTimestamp = timestamp;
 
         // Match the canvas size and DPI to that of the viewport.
-        Main.canvasResize();
+        Renderer.canvasResize();
 
         // Clear the screen.
         Renderer.clear();
@@ -585,7 +579,8 @@ export class Main {
                 continue;
             if (entity.process && !Global.paused)
                 entity.process();
-            Renderer.renderEntity(entity);
+            if (entity.render)
+                Renderer.renderEntity(entity);
         }
 
         // Add all Entities in the queue for addition.

@@ -21,10 +21,10 @@ async function load() {
     let skyImage = new SolidColor("#478db5", canvas.width, canvas.height);
     sky = new Entity(new Sprite([skyImage]), canvas.width / 2, canvas.height / 2);
     sky.process = () => {
-        sky.sprite.frames[sky.sprite.currentFrame].width = Main.getCanvasWidth();
-        sky.sprite.frames[sky.sprite.currentFrame].height = Main.getCanvasHeight();
-        sky.x = Main.getCanvasWidth() / 2;
-        sky.y = Main.getCanvasHeight() / 2;
+        sky.sprite.frames[sky.sprite.currentFrame].width = Renderer.getCanvasWidth();
+        sky.sprite.frames[sky.sprite.currentFrame].height = Renderer.getCanvasHeight();
+        sky.x = Renderer.getCanvasWidth() / 2;
+        sky.y = Renderer.getCanvasHeight() / 2;
         if (Global.raining) {
             if (sky.brightness > 50) {
                 sky.brightness -= 0.1 * Main.delta;
@@ -164,16 +164,45 @@ class Cloud extends Entity {
 }
 
 class Raindrop extends Entity {
-    constructor(x, y) {
+    constructor(x, y, parent) {
         x ??= 0;
         y ??= 0;
         super(new Sprite([Global.assets.raindropImg]), x, y, 1);
         this.yVel = 0.5;
         this.timer = random(0, 1000);
+        this.render = false;
+        this.erasing = false;
 
         this.process = () => {
-            this.yVel += 0.1 * Main.delta / 6.9;
-            this.y += this.yVel * Main.delta;
+            if (!Global.raining || parent.deleted || parent.erasing)
+                this.erasing = true;
+            if (this.timer > 0) {
+                if (this.erasing) {
+                    this.render = false;
+                    this.delete();
+                    return;
+                }
+                this.timer -= Main.delta;
+                if (this.timer < 0)
+                    this.timer = 0;
+            }
+            if (this.timer == 0) {
+                this.render = true;
+                this.yVel += 0.1 * Main.delta / 6.9;
+                this.y += this.yVel * Main.delta;
+                if (this.y > Renderer.getCanvasHeight() + 15) {
+                    if (!this.erasing) {
+                        this.render = false;
+                        this.y = y;
+                        this.timer = random(0, 1000);
+                        this.yVel = 0.5;
+                    }
+                    else {
+                        this.render = false;
+                        this.delete();
+                    }
+                }
+            }
         }
     }
 }
@@ -206,8 +235,8 @@ function cloudFormation3(x, y) {
 }
 
 function genCloud() {
-    let x = Main.getCanvasWidth() / 2 + random(Main.getCanvasWidth() / -4, Main.getCanvasWidth() / 4) + random(Main.getCanvasWidth() / -6, Main.getCanvasWidth() / 6);
-    let y = Main.getCanvasHeight() / 2 + random(Main.getCanvasHeight() / -4, Main.getCanvasHeight() / 4) + random(Main.getCanvasHeight() / -6, Main.getCanvasHeight() / 6);
+    let x = Renderer.getCanvasWidth() / 2 + random(Renderer.getCanvasWidth() / -4, Renderer.getCanvasWidth() / 4) + random(Renderer.getCanvasWidth() / -6, Renderer.getCanvasWidth() / 6);
+    let y = Renderer.getCanvasHeight() / 2 + random(Renderer.getCanvasHeight() / -4, Renderer.getCanvasHeight() / 4) + random(Renderer.getCanvasHeight() / -6, Renderer.getCanvasHeight() / 6);
     for (let i = 0; i < random(10, 30); i++)
         cloudFormation3(x + random(-30, 30), y + random(-30, 30));
 }
@@ -215,6 +244,6 @@ function genCloud() {
 function startRaining() {
     for (let entity of Entities.list) {
         if (entity instanceof Cloud && Math.random() < 0.1)
-            new Raindrop(entity.x, entity.y);
+            new Raindrop(entity.x, entity.y, entity);
     }
 }
