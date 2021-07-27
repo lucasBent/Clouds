@@ -174,9 +174,12 @@ class Raindrop extends Entity {
         this.timer = random(0, 1000);
         this.render = false;
         this.erasing = false;
+        this.toErase = false;
 
         this.process = () => {
-            if (parent.deleted || parent.erasing)
+            if (!Global.raining)
+                this.toErase = true;
+            if (parent.deleted || parent.erasing || (Global.raining && this.toErase))
                 this.erasing = true;
             if (this.timer > 0) {
                 if (this.erasing) {
