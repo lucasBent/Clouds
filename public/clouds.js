@@ -8,6 +8,7 @@ Global.paused = false;
 Global.raining = false;
 let jimmy = "cool guy";
 let sky = undefined;
+let lightning = undefined;
 let nextFrame = false;
 
 async function load() {
@@ -36,11 +37,39 @@ async function load() {
         }
         else {
             if (sky.brightness < 100) {
-                sky.brightness += 0.05 * Main.delta;
+                sky.brightness += 0.025 * Main.delta;
                 if (sky.brightness > 75)
                     stopRaining();
                 if (sky.brightness > 100)
                     sky.brightness = 100;
+            }
+        }
+    }
+
+    let lightningImage = new SolidColor("#eeeeee", canvas.width, canvas.height);
+    lightning = new Entity(new Sprite([lightningImage]), canvas.width / 2, canvas.height / 2);
+    lightning.render = false;
+    lightning.timer = random(4000, 8000);
+    lightning.flashing = false;
+    lightning.process = () => {
+        if (Global.raining && !lightning.flashing) {
+            lightning.timer -= Main.delta;
+            if (lightning.timer < 0)
+                lightning.timer = 0;
+            if (lightning.timer == 0) {
+                lightning.render = true;
+                lightning.opacity = 0.8;
+                lightning.flashing = true;
+            }
+        }
+        if (lightning.flashing) {
+            lightning.opacity -= lightning.opacity * Main.delta / 200;
+            if (lightning.opacity < 0.005)
+                lightning.opacity = 0;
+            if (lightning.opacity == 0) {
+                lightning.render = false;
+                lightning.flashing = false;
+                lightning.timer = random(1000, 18000);
             }
         }
     }
@@ -81,8 +110,10 @@ async function load() {
         }
         if (Input.detect("keyjustpressed").on("ArrowUp"))
             genCloud();
-        if (Input.detect("keyjustpressed").on(" "))
+        if (Input.detect("keyjustpressed").on(" ")) {
             Global.raining = !Global.raining;
+            lightning.timer = random(4000, 8000);
+        }
     }
     Main.processAlwaysAfter = () => {
         if (Input.detect("keyjustpressed").on("Enter"))
@@ -169,7 +200,7 @@ class Raindrop extends Entity {
     constructor(x, y, parent) {
         x ??= 0;
         y ??= 0;
-        super(new Sprite([Global.assets.raindropImg]), x, y, 1);
+        super(new Sprite([Global.assets.raindropImg]), x, y, 2);
         this.yVel = 0.5;
         this.timer = random(0, 1000);
         this.render = false;
