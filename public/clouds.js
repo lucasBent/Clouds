@@ -9,7 +9,12 @@ Global.raining = false;
 let jimmy = "cool guy";
 let sky = undefined;
 let lightning = undefined;
+let rainbow = undefined;
+let rainbowSlide = undefined;
 let nextFrame = false;
+let lightningStruck = false;
+let makingRainbow = false;
+let fadingRainbow = false;
 
 async function load() {
     canvas.width = window.innerWidth;
@@ -40,8 +45,13 @@ async function load() {
                 sky.brightness += 0.025 * Main.delta;
                 if (sky.brightness > 75)
                     stopRaining();
-                if (sky.brightness > 100)
+                if (sky.brightness > 100) {
                     sky.brightness = 100;
+                    if (lightningStruck) {
+                        lightningStruck = false;
+                        makeRainbow();
+                    }
+                }
             }
         }
     }
@@ -57,6 +67,7 @@ async function load() {
             if (lightning.timer < 0)
                 lightning.timer = 0;
             if (lightning.timer == 0) {
+                lightningStruck = true;
                 lightning.render = true;
                 lightning.opacity = 0.8;
                 lightning.flashing = true;
@@ -70,6 +81,57 @@ async function load() {
                 lightning.render = false;
                 lightning.flashing = false;
                 lightning.timer = random(1000, 18000);
+            }
+        }
+    }
+
+    let rainbowImage = await Loader.loadImage("./images/rainbow.png", canvas.width);
+    rainbowImage.height = rainbowImage.width * 0.259282178 / (canvas.width / canvas.height);
+    rainbow = new Entity(new Sprite([rainbowImage]), canvas.width / 2, canvas.height / 2.5);
+    rainbow.render = false;
+    rainbow.opacity = 1;
+    rainbow.process = () => {
+        rainbow.x = canvas.width / 2;
+        rainbow.y = canvas.height / 2.5;
+        rainbowImage.width = Renderer.getCanvasWidth();
+        rainbowImage.height = rainbowImage.width * 0.259282178 / (canvas.width / canvas.height);
+        if (fadingRainbow) {
+            rainbow.opacity -= Main.delta / 30000;
+            if (rainbow.opacity <= 0) {
+                rainbow.render = false;
+                rainbow.opacity = 1;
+                fadingRainbow = false;
+            }
+        }
+    }
+
+    let rainbowSlideImage = new SolidColor("#478db5", rainbowImage.width, rainbowImage.height);
+    rainbowSlide = new Entity(new Sprite([rainbowSlideImage]), canvas.width / 2, canvas.height / 2.5);
+    rainbowSlide.render = false;
+    rainbowSlide.progress = 1;
+    rainbowSlide.timer = 2000;
+    rainbowSlide.process = () => {
+        if (!makingRainbow)
+            rainbowSlide.x = rainbow.x;
+        rainbowSlide.y = rainbow.y;
+        rainbowSlide.width = rainbow.width;
+        rainbowSlide.height = rainbow.height;
+        if (makingRainbow) {
+            if (rainbowSlide.timer > 0)
+                rainbowSlide.timer -= Main.delta;
+            if (rainbowSlide.timer < 0)
+                rainbowSlide.timer = 0;
+            if (rainbowSlide.timer == 0) {
+                rainbowSlide.progress += Main.delta;
+                if (rainbowSlide.progress >= 2000) {
+                    makingRainbow = false;
+                    rainbowSlide.progress = 1;
+                    rainbowSlide.timer = 2000;
+                    rainbowSlide.render = false;
+                    fadingRainbow = true;
+                }
+                else
+                    rainbowSlide.x = rainbow.x + canvas.width * (rainbowSlide.progress / 2000);
             }
         }
     }
@@ -111,8 +173,10 @@ async function load() {
         if (Input.detect("keyjustpressed").on("ArrowUp"))
             genCloud();
         if (Input.detect("keyjustpressed").on(" ")) {
-            Global.raining = !Global.raining;
-            lightning.timer = random(4000, 8000);
+            if (!makingRainbow && !fadingRainbow) {
+                Global.raining = !Global.raining;
+                lightning.timer = random(4000, 8000);
+            }
         }
     }
     Main.processAlwaysAfter = () => {
@@ -200,7 +264,7 @@ class Raindrop extends Entity {
     constructor(x, y, parent) {
         x ??= 0;
         y ??= 0;
-        super(new Sprite([Global.assets.raindropImg]), x, y, 2);
+        super(new Sprite([Global.assets.raindropImg]), x, y, 4);
         this.yVel = 0.5;
         this.timer = random(0, 1000);
         this.render = false;
@@ -289,4 +353,14 @@ function stopRaining() {
         if (entity instanceof Raindrop)
             entity.erasing = true;
     }
+}
+
+function makeRainbow() {
+    rainbow.render = true;
+    rainbow.opacity = 1;
+    rainbowSlide.render = true;
+    rainbowSlide.progress = 1;
+    rainbowSlide.timer = 2000;
+    makingRainbow = true;
+    fadingRainbow = false;
 }
