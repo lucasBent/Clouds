@@ -1,9 +1,10 @@
-import { Entity, Entities, SolidColor, Sprite, Input, Hitbox, Renderer, Loader, Main, Global } from "./engine/engine.js"
+import { Entity, Entities, SolidColor, Sprite, Sound, Input, Hitbox, Renderer, Loader, Main, Global } from "./engine/engine.js"
 
 const canvas = document.getElementById("display");
 const ctx = canvas.getContext("2d");
-Global.assets = new Object();
-Global.debug = true;
+Global.assets.img = new Object();
+Global.assets.audio = new Object();
+Global.debug = false;
 Global.paused = false;
 Global.raining = false;
 let jimmy = "cool guy";
@@ -32,12 +33,16 @@ async function load() {
         sky.x = Renderer.getCanvasWidth() / 2;
         sky.y = Renderer.getCanvasHeight() / 2;
         if (Global.raining) {
+            if (!Global.rain.isPlaying())
+                Global.rain.play();
             if (sky.brightness > 50) {
                 sky.brightness -= 0.05 * Main.delta;
                 if (sky.brightness < 50) {
                     sky.brightness = 50;
                     startRaining();
                 }
+                Global.music.audio.volume = sky.brightness / 100;
+                Global.rain.audio.volume = 1 - sky.brightness / 100;
             }
         }
         else {
@@ -47,11 +52,14 @@ async function load() {
                     stopRaining();
                 if (sky.brightness > 100) {
                     sky.brightness = 100;
+                    Global.rain.stop();
                     if (lightningStruck) {
                         lightningStruck = false;
                         makeRainbow();
                     }
                 }
+                Global.music.audio.volume = sky.brightness / 100;
+                Global.rain.audio.volume = 1 - sky.brightness / 100;
             }
         }
     }
@@ -71,11 +79,12 @@ async function load() {
                 lightning.render = true;
                 lightning.opacity = 0.8;
                 lightning.flashing = true;
+                Global.thunder[random(0, 3)].playNow(0);
             }
         }
         if (lightning.flashing) {
             lightning.opacity -= lightning.opacity * Main.delta / 200;
-            if (lightning.opacity < 0.005)
+            if (lightning.opacity < 0.0025)
                 lightning.opacity = 0;
             if (lightning.opacity == 0) {
                 lightning.render = false;
@@ -141,8 +150,17 @@ async function load() {
     Input.mouseHook();
     Input.keyHook();
 
-    Global.assets.cloudImg = await Loader.loadImage("./images/cloud.png", 28, 31);
-    Global.assets.raindropImg = await Loader.loadImage("./images/raindrop.png", 3, 30);
+    Global.assets.img.cloudImg = await Loader.loadImage("./images/cloud.png", 28, 31);
+    Global.assets.img.raindropImg = await Loader.loadImage("./images/raindrop.png", 3, 30);
+    Global.assets.audio.music = await Loader.loadAudio("./audio/undella town.mp3");
+    Global.assets.audio.thunder1 = await Loader.loadAudio("./audio/thunder1.mp3");
+    Global.assets.audio.thunder2 = await Loader.loadAudio("./audio/thunder2.mp3");
+    Global.assets.audio.thunder3 = await Loader.loadAudio("./audio/thunder3.mp3");
+    Global.assets.audio.thunder4 = await Loader.loadAudio("./audio/thunder4.mp3");
+    Global.assets.audio.rain = await Loader.loadAudio("./audio/rain.mp3");
+    Global.music = new Sound(Global.assets.audio.music);
+    Global.thunder = [new Sound(Global.assets.audio.thunder1), new Sound(Global.assets.audio.thunder2), new Sound(Global.assets.audio.thunder3), new Sound(Global.assets.audio.thunder4)];
+    Global.rain = new Sound(Global.assets.audio.rain);
 
     if (Global.debug) {
         jimmy = new Cloud(400, 500);
@@ -180,6 +198,8 @@ async function load() {
         }
     }
     Main.processAlwaysAfter = () => {
+        if (!Global.music.isPlaying())
+            Global.music.play();
         if (Input.detect("keyjustpressed").on("Enter"))
             Global.paused = !Global.paused;
         if (Global.debug) {
@@ -209,6 +229,9 @@ async function load() {
 
             if (Input.detect("keyjustpressed").on("1"))
                 console.log(Entities.list.length);
+
+            if (Input.detect("keyjustpressed").on("2"))
+                Global.thunder[random(0, 3)].playNow(0);
         }
     }
     Main.startProcess();
@@ -220,7 +243,7 @@ class Cloud extends Entity {
         y ??= 0;
         direction ??= 0;
         timer ??= 0;
-        super(new Sprite([Global.assets.cloudImg]), x, y, false, direction, 0.85);
+        super(new Sprite([Global.assets.img.cloudImg]), x, y, false, direction, 0.85);
         this.clockwise = Math.random() < 0.5 ? 1 : -1;
         this.scale = random(10, 60) / 100;
         this.opacity = this.scale * 0.85;
@@ -264,7 +287,7 @@ class Raindrop extends Entity {
     constructor(x, y, parent) {
         x ??= 0;
         y ??= 0;
-        super(new Sprite([Global.assets.raindropImg]), x, y, 4);
+        super(new Sprite([Global.assets.img.raindropImg]), x, y, 4);
         this.yVel = 0.5;
         this.timer = random(0, 1000);
         this.render = false;

@@ -142,6 +142,63 @@ export class Sprite {
 }
 
 /**
+* A soundfile with methods for easy playback.
+*/
+export class Sound {
+
+    /**
+     * @param {Audio} audio A loaded Audio asset for this Sound.
+     */
+    constructor(audio) {
+        this.audio = audio;
+    }
+
+    /**
+     * Sets the currentTime of the Sound's Audio (if specified) and calls its play() method.
+     * @param {number} [time] The (optional) time position at which to play the Sound, specified in seconds.
+     */
+    play(time) {
+        if (time)
+            this.audio.currentTime = time;
+        this.audio.play();
+    }
+
+    /**
+     * Sets the currentTime of the Sound's Audio (if specified), pauses the Audio, then calls its play() method.
+     * @param {number} time The time position at which to play the Sound, specified in seconds.
+     */
+    playNow(time) {
+        this.audio.pause();
+        this.audio.currentTime = time;
+        this.audio.play();
+    }
+
+    /**
+     * Calls the pause() method of this Sound's Audio.
+     */
+    pause() {
+        this.audio.pause();
+    }
+
+    /**
+     * Calls the pause() method of this Sound's Audio, then sets its currentTime to 0.
+     */
+    stop() {
+        this.audio.pause();
+        this.audio.currentTime = 0;
+    }
+
+    /**
+     * Determines whether the Sound is currently playing or not.
+     * 
+     * @returns {boolean} true if the Sound is currently playing, false if not.
+     */
+    isPlaying() {
+        return !this.audio.paused;
+    }
+}
+
+/**
 * A class with static methods for input event listening.
 */
 export class Input {
@@ -503,6 +560,26 @@ export class Loader {
             img.src = src;
         })
     }
+
+    /**
+     * Loads an Audio object from the given src.
+     * @param {String} src The src of the audio file to be loaded.
+     * 
+     * @returns {Audio} A loaded Audio object.
+     */
+    static async loadAudio(src) {
+        let audio = await this.loadAudioProcess(src);
+        return audio;
+    }
+
+    static loadAudioProcess(src) {
+        return new Promise((resolve, reject) => {
+            let audio = new Audio();
+            audio.oncanplay = () => resolve(audio);
+            audio.onerror = reject;
+            audio.src = src;
+        })
+    }
 }
 
 /**
@@ -629,4 +706,5 @@ export class Main {
 */
 export class Global {
     static paused = false;
+    static assets = new Object();
 }
