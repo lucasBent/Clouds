@@ -353,7 +353,7 @@ function cloudFormation2(x, y) {
 }
 
 function cloudFormation3(x, y) {
-    let density = random(5, 30);
+    let density = random(5, 20);
     for (let i = 0; i < density; i++) {
         new Cloud(x, y, i, i * 10);
         x += Math.floor(random(Math.round(-15 + (i * 0.9)), 15 - (i * 0.9)));
