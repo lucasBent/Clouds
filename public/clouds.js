@@ -4,7 +4,7 @@ const canvas = document.getElementById("display");
 const ctx = canvas.getContext("2d");
 Global.assets.img = new Object();
 Global.assets.audio = new Object();
-Global.debug = false;
+Global.debug = true;
 Global.paused = false;
 Global.raining = false;
 let jimmy = "cool guy";
@@ -70,6 +70,10 @@ async function load() {
     lightning.timer = random(4000, 8000);
     lightning.flashing = false;
     lightning.process = () => {
+        lightning.sprite.frames[lightning.sprite.currentFrame].width = Renderer.getCanvasWidth();
+        lightning.sprite.frames[lightning.sprite.currentFrame].height = Renderer.getCanvasHeight();
+        lightning.x = Renderer.getCanvasWidth() / 2;
+        lightning.y = Renderer.getCanvasHeight() / 2;
         if (Global.raining && !lightning.flashing) {
             lightning.timer -= Main.delta;
             if (lightning.timer < 0)
@@ -89,7 +93,7 @@ async function load() {
             if (lightning.opacity == 0) {
                 lightning.render = false;
                 lightning.flashing = false;
-                lightning.timer = random(1000, 18000);
+                lightning.timer = random(1000, 28000);
             }
         }
     }
@@ -123,8 +127,8 @@ async function load() {
         if (!makingRainbow)
             rainbowSlide.x = rainbow.x;
         rainbowSlide.y = rainbow.y;
-        rainbowSlide.width = rainbow.width;
-        rainbowSlide.height = rainbow.height;
+        rainbowSlideImage.width = rainbowImage.width;
+        rainbowSlideImage.height = rainbowImage.height;
         if (makingRainbow) {
             if (rainbowSlide.timer > 0)
                 rainbowSlide.timer -= Main.delta;
@@ -349,24 +353,24 @@ function cloudFormation2(x, y) {
 }
 
 function cloudFormation3(x, y) {
-    let density = random(5, 40);
+    let density = random(5, 30);
     for (let i = 0; i < density; i++) {
         new Cloud(x, y, i, i * 10);
-        x += random(Math.round(-15 + (i * 0.9)), 15 - (i * 0.9));
-        y += random(-10 + (i * 0.5), 10 - (i * 0.5));
+        x += Math.floor(random(Math.round(-15 + (i * 0.9)), 15 - (i * 0.9)));
+        y += Math.floor(random(-10 + (i * 0.5), 10 - (i * 0.5)));
     }
 }
 
 function genCloud() {
     let x = Renderer.getCanvasWidth() / 2 + random(Renderer.getCanvasWidth() / -4, Renderer.getCanvasWidth() / 4) + random(Renderer.getCanvasWidth() / -6, Renderer.getCanvasWidth() / 6);
     let y = Renderer.getCanvasHeight() / 2 + random(Renderer.getCanvasHeight() / -4, Renderer.getCanvasHeight() / 4) + random(Renderer.getCanvasHeight() / -6, Renderer.getCanvasHeight() / 6);
-    for (let i = 0; i < random(10, 30); i++)
-        cloudFormation3(x + random(-30, 30), y + random(-30, 30));
+    for (let i = 0; i < random(10, 20); i++)
+        cloudFormation3(x + random(-15, 15), y + random(-15, 15));
 }
 
 function startRaining() {
     for (let entity of Entities.list) {
-        if (entity instanceof Cloud && Math.random() < 0.1)
+        if (entity instanceof Cloud && Math.random() < 0.2)
             new Raindrop(entity.x, entity.y, entity);
     }
 }
