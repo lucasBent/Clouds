@@ -11,17 +11,23 @@ const touch = new Hammer.Manager(canvas, {
     ]
 });
 touch.on("swipe", (ev) => {
-    if (ev.direction == 8) {
-        console.log("up swipe");
-    }
-    else if (ev.direction == 16) {
-        console.log("down swipe");
-    }
-    else if (ev.direction == 2) {
-        console.log("left swipe");
-    }
-    else if (ev.direction == 4) {
-        console.log("right swipe");
+    if ("ontouchstart" in window) {
+        if (ev.direction == 8) {
+            console.log("up swipe");
+        }
+        else if (ev.direction == 16) {
+            console.log("down swipe");
+            for (let entity of Entities.list) {
+                if (entity instanceof Cloud)
+                    entity.erasing = true;
+            }
+        }
+        else if (ev.direction == 2) {
+            console.log("left swipe");
+        }
+        else if (ev.direction == 4) {
+            console.log("right swipe");
+        }
     }
 });
 Global.assets.img = new Object();
