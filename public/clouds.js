@@ -17,10 +17,10 @@ touch.on("swipe", (ev) => {
         }
         else if (ev.direction == 16) {
             console.log("down swipe");
-            for (let entity of Entities.list) {
-                if (entity instanceof Cloud)
-                    entity.erasing = true;
-            }
+            //for (let entity of Entities.list) {
+            //    if (entity instanceof Cloud)
+            //        entity.erasing = true;
+            //}
         }
         else if (ev.direction == 2) {
             console.log("left swipe");
