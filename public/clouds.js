@@ -1,7 +1,29 @@
 import { Entity, Entities, SolidColor, Sprite, Sound, Input, Hitbox, Renderer, Loader, Main, Global } from "./engine/engine.js"
+import "./hammer.min.js"
+import "./preventghostclick.js"
 
 const canvas = document.getElementById("display");
 const ctx = canvas.getContext("2d");
+PreventGhostClick(canvas);
+const touch = new Hammer.Manager(canvas, {
+    recognizers: [
+        [Hammer.Swipe, { direction: Hammer.DIRECTION_ALL }]
+    ]
+});
+touch.on("swipe", (ev) => {
+    if (ev.direction == 8) {
+        console.log("up swipe");
+    }
+    else if (ev.direction == 16) {
+        console.log("down swipe");
+    }
+    else if (ev.direction == 2) {
+        console.log("left swipe");
+    }
+    else if (ev.direction == 4) {
+        console.log("right swipe");
+    }
+});
 Global.assets.img = new Object();
 Global.assets.audio = new Object();
 Global.debug = false;
