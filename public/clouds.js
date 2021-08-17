@@ -24,7 +24,7 @@ touch.on("swipe", (ev) => {
                 lightning.timer = random(4000, 8000);
             }
         }
-        if (ev.direction == 4 && Global.raining) {
+        if (ev.direction == 4 && !Global.raining) {
             if (!makingRainbow && !fadingRainbow) {
                 Global.raining = true;
                 lightning.timer = random(4000, 8000);
