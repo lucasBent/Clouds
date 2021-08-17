@@ -125,7 +125,7 @@ async function load() {
     let rainbowImage = await Loader.loadImage("./images/rainbow.png", canvas.width);
     rainbowImage.height = rainbowImage.width * 0.259282178 / (canvas.width / canvas.height);
     rainbow = new Entity(new Sprite([rainbowImage]), canvas.width / 2, canvas.height / 2.5);
-    rainbow.render = false;
+    rainbow.render = true;
     rainbow.opacity = 1;
     rainbow.process = () => {
         rainbow.x = canvas.width / 2;
