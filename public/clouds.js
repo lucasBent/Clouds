@@ -1,10 +1,8 @@
 import { Entity, Entities, SolidColor, Sprite, Sound, Input, Hitbox, Renderer, Loader, Main, Global } from "./engine/engine.js"
 import "./hammer.min.js"
-import "./preventghostclick.js"
 
 const canvas = document.getElementById("display");
 const ctx = canvas.getContext("2d");
-//PreventGhostClick(canvas);
 const touch = new Hammer.Manager(canvas, {
     recognizers: [
         [Hammer.Swipe, { direction: Hammer.DIRECTION_ALL }]
@@ -12,21 +10,19 @@ const touch = new Hammer.Manager(canvas, {
 });
 touch.on("swipe", (ev) => {
     if ("ontouchstart" in window) {
-        if (ev.direction == 8) {
-            console.log("up swipe");
-        }
+        if (ev.direction == 8)
+            genCloud();
         else if (ev.direction == 16) {
-            console.log("down swipe");
             for (let entity of Entities.list) {
                 if (entity instanceof Cloud)
                     entity.erasing = true;
             }
         }
-        else if (ev.direction == 2) {
-            console.log("left swipe");
-        }
-        else if (ev.direction == 4) {
-            console.log("right swipe");
+        else if (ev.direction == 2 || ev.direction == 4) {
+            if (!makingRainbow && !fadingRainbow) {
+                Global.raining = !Global.raining;
+                lightning.timer = random(4000, 8000);
+            }
         }
     }
 });
