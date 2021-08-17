@@ -18,9 +18,15 @@ touch.on("swipe", (ev) => {
                     entity.erasing = true;
             }
         }
-        else if (ev.direction == 2 || ev.direction == 4) {
+        if (ev.direction == 2 && Global.raining) {
             if (!makingRainbow && !fadingRainbow) {
-                Global.raining = !Global.raining;
+                Global.raining = false;
+                lightning.timer = random(4000, 8000);
+            }
+        }
+        if (ev.direction == 4 && Global.raining) {
+            if (!makingRainbow && !fadingRainbow) {
+                Global.raining = true;
                 lightning.timer = random(4000, 8000);
             }
         }
