@@ -168,7 +168,7 @@ async function load() {
                     fadingRainbow = true;
                 }
                 else
-                    rainbowSlide.x = rainbow.x + canvas.width * (rainbowSlide.progress / 2000);
+                    rainbowSlide.x = rainbow.x + Renderer.getCanvasWidth() * (rainbowSlide.progress / 2000);
             }
         }
     }
