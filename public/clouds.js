@@ -4,7 +4,7 @@ import "./preventghostclick.js"
 
 const canvas = document.getElementById("display");
 const ctx = canvas.getContext("2d");
-PreventGhostClick(canvas);
+//PreventGhostClick(canvas);
 const touch = new Hammer.Manager(canvas, {
     recognizers: [
         [Hammer.Swipe, { direction: Hammer.DIRECTION_ALL }]
@@ -17,10 +17,10 @@ touch.on("swipe", (ev) => {
         }
         else if (ev.direction == 16) {
             console.log("down swipe");
-            //for (let entity of Entities.list) {
-            //    if (entity instanceof Cloud)
-            //        entity.erasing = true;
-            //}
+            for (let entity of Entities.list) {
+                if (entity instanceof Cloud)
+                    entity.erasing = true;
+            }
         }
         else if (ev.direction == 2) {
             console.log("left swipe");
