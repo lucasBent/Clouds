@@ -158,7 +158,7 @@ async function load() {
             rainbowSlide.x = rainbow.x;
         rainbowSlide.y = rainbow.y;
         rainbowSlideImage.width = rainbowImage.width;
-        rainbowSlideImage.height = rainbowImage.height;
+        rainbowSlideImage.height = rainbowImage.height * 1.2;
         if (makingRainbow) {
             if (rainbowSlide.timer > 0)
                 rainbowSlide.timer -= Main.delta;
